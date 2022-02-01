@@ -1,3 +1,4 @@
+import 'package:alan_voice/alan_voice.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -37,13 +38,39 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
     });
   }
-  
-  setupAlan(){
-     
+
+  setupAlan() {
+    AlanVoice.addButton(
+        "683612eb0215d5ae7d89e07bd0d6b7302e956eca572e1d8b807a3e2338fdd0dc/stage",
+        buttonAlign: AlanVoice.BUTTON_ALIGN_LEFT);
+
+    AlanVoice.callbacks.add((command) => _handlecommand(command.data));
   }
+
+  _handlecommand(Map<String, dynamic> response) {
+    switch (response["command"]) {
+      case "play":
+        _playMusic(_selectedRadio!.url);
+        break;
+
+      case "stop":
+        _audioPlayer.stop();
+        break;
+
+         case "next":
+         _audioPlayer.stop();
+          break;
+
+      default:
+        break;
+    }
+  }
+
   fatchRadios() async {
     final radiojson = await rootBundle.loadString("assets/radio.json");
     radios = MyRadioList.fromJson(radiojson).radios;
+    _selectedRadio = radios[0];
+    _selectedColor = Color(int.parse(_selectedRadio!.color));
     print("rrrrrrrrrrr");
     print(radios);
     setState(() {});
@@ -87,8 +114,11 @@ class _HomePageState extends State<HomePage> {
               itemCount: radios.length,
               aspectRatio: 1.0,
               onPageChanged: (index) {
+                _selectedRadio = radios[index];
                 final colorx = radios[index].color;
                 _selectedColor = Color(int.tryParse(colorx) as int);
+
+                setState(() {});
               },
               enlargeCenterPage: true,
               itemBuilder: (context, index) {
